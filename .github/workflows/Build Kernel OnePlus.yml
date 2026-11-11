@@ -757,7 +757,13 @@ jobs:
           echo "::group::最终 Makefile 中版本信息及部分调试结果预览"
           grep -nE '^(REPO_OWNER|REPO_NAME|REPO_BRANCH|KSU_VERSION_API|KSU_VERSION_FULL|VERSION_TAG|GIT_BIN|CURL_BIN)' kernel/Makefile
           echo "::endgroup::"
-
+      - name: Patch SukiSU selinux typos
+        run: |        
+          f=kernel_workspace/kernel_platform/drivers/kernelsu/kernel/selinux/rules.c
+          sed -i 's/selinux_status_update_policyload(seqno0)/selinux_status_update_policyload(seqno)/g' "$f"
+          sed -i 's/policydb->latest_granting/db->latest_granting/g' "$f"
+          echo "--- patch 后 ---"
+          grep -n 'seqno0\|policydb->' "$f" || echo "已全部修正" 
       - name: Apply Patches SukiSU Ultra
         env:
           FILE: ${{ github.event.inputs.FILE }}
